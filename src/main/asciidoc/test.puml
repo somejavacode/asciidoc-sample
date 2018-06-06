@@ -1,0 +1,20 @@
+@startuml
+
+/' this is a comment block in plantuml
+some example style, get rid of yellow and red colors http://plantuml.com/skinparam.html
+skinparam backgroundColor transparent
+skinparam sequenceParticipantBorderColor #220000
+skinparam sequenceParticipantBackgroundColor #FFFFEE
+skinparam sequenceArrowColor #220000
+skinparam sequenceBoxLineColor black
+skinparam  sequenceLifeLineBorderColor black
+'/
+' this is a single line comment
+
+' -- the faster way --
+skinparam monochrome true
+' the actual sequence actor -> actor : message
+Alice -> Bob:  Request
+Bob -> Alice:  Response
+
+@enduml

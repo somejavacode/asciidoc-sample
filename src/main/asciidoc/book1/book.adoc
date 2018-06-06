@@ -1,0 +1,53 @@
+// create an example with the following features
+// chapter includes
+// toc
+// foot notes
+// bibliography
+// ? references
+// ? index
+// svg images
+// custom css
+// custom pdf stype
+//
+// http://asciidoctor.org/docs/user-manual/
+// 16 anatomy -> element:  blocks, inline quotes text, and macros??
+// paragraph block, table block
+// element,  attribute on element?, options attribute, document header, 
+// 
+// this is the header...
+= Document Title
+:author: Author Name
+:email: author@email.com
+:revnumber: 1.0.1
+// this is a string
+:revdate: datatatatum
+:revremark: Initial public version
+:doctype: arsch
+
+
+== Level 1 Section Title 1
+
+
+=== Level 2 
+
+:name1: value1
+:name2: value2
+
+testing {name1} {name2} 
+
+imagesdir value {imagesdir} +
+docdir value {docdir}
+
+
+==== Level 3
+
+.image testing
+image::book1/test2.svg[test image, 100, 50]
+
+==== Level 3
+
+
+
+== Level 1 Section Title 2
+
+include::chapters/chapter02.asciidoc[]

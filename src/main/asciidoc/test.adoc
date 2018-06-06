@@ -1,0 +1,254 @@
+// http://asciidoctor.org/docs/user-manual/ complete spec, lengthy
+//
+// this "level 0" section creates a title page in pdf
+= Document Title: Subtitle
+:author: Arthur Author
+:email: author@email.com
+:revnumber: 1.0.1.0.1
+// this is just a string
+:revdate: 2020-20-40
+:revremark: Initial public version
+// enable table of content
+:toc: marcro
+:toclevels: 3
+:sectnums:
+// option to limit level of numbering
+// :sectnumlevels: 2
+// enable icons
+// this is (implicitly) font awesome
+// NOTE: this can be in document header OR pom.xml (see according entry in <attributes>)
+//:icons: font
+// 
+// "Content between the document header and the first section level title is called the preamble."
+// note: need blank line before preamble (header ends with blank line). otherwise it's a subtitle.
+
+First paragraph of preamble
+
+Second paragraph of preamble
+Second paragraph of preamble
+Second paragraph of preamble
+Second paragraph of preamble
+Second paragraph of preamble
+
+// place TOC after preamble. does not work
+toc::[]
+
+== Level 1 Section Title
+
+Testing umlauts in utf-8: öäüßÄÜÖ _öäüßÄÜÖ_
+
+// http://codegolf.stackexchange.com/questions/66543/squish-unsquish-ligatures
+// there are utf-8 chacracters for ligaturues. latex does this "automatically"
+
+Testing ligatures (with according  UTF-8 characters): +
+ﬂash, oﬀer, ﬁsh, _ﬂash, oﬀer, ﬁsh_ +
+more: ffi=ﬃ, ffl=ﬄ, ij=ĳ, ae=æ, oe=œ
+
+=== Level 2 Section Title
+
+.Table Title
+|===
+|Name of Column 1 |Name of Column 2 |Name of Column 3 
+
+|Cell in column 1, row 1 |Cell in column 2, row 1 |Cell in column 3, row 1
+
+|Cell in column 1, row 2
+|Cell in column 2, row 2
+|Cell in column 3, row 2
+
+|===
+
+
+=== Image import
+
+.image testing
+// in case of svg height attribute is ignored (with chrome), image remains square
+image::test1.svg[test image, 150, 50]
+
+// Note: it occured that the headline was seperated from the actual diagram example. 
+// this looks rather ugly. the manual page break (<<<) "fixes" this issue.
+// but the fix is ugly again as it depends on content rendered before.
+// a "proper fix" would "join" certain elements, but asciidoc offers no syntax here.
+<<<
+=== Diagrams
+
+Test of `ditaa` type diagram.
+
+// this fails for PDF output. generated image is expected in source path (but location is target/generated-docs/images
+// error message:
+// asciidoctor: WARNING: image to embed not found or not readable: F:/dev/github/asciidoc-sample/src/main/asciidoc/images/ditaa-diagram.png
+// https://github.com/asciidoctor/asciidoctor-maven-plugin/issues/196 "Generated diagram images failed to be embedded in pdf"
+//
+// improved(fixed) with scale  -resolution is far too low for pdf-
+
+// width, height: -> copy to html image attribute, will be scaled by browser (only width is enough).
+// scale=3: scale up for better (acceptable) printing quality.
+[ditaa, "ditaa-test", png, scale=3, transparent=true, width=700]
+// see http://ditaa.sourceforge.net/
+// how to forward parameter? e.g. scale=3
+// anwser is "in the source". for magic mapping see "OPTIONS = ..."
+// https://github.com/asciidoctor/asciidoctor-diagram/blob/master/lib/asciidoctor-diagram/ditaa/extension.rb
+//
+// possible options:
+// scale=<number>
+// tabs=<number>
+// background=<RRGGBB>
+// antialias=true|false
+// separation=true|false
+// shadows=true|false
+// debug=true|false
+// fixed-slope=true|false
+// transparent=true|false
+//
+....
+                   +-------------+
+                   | Asciidoctor |-------+
+                   |   diagram   |       |
+                   +-------------+       | PNG out
+                       ^                 |
+                       | ditaa in        |
+                       |                 v
+ +--------+   +--------+----+    /---------------\
+ |        | --+ Asciidoctor +--> |               |
+ |  Text  |   +-------------+    |   Beautiful   |
+ |Document|   |   !magic!   |    |    Output     |
+ |     {d}|   |             |    |               |
+ +---+----+   +-------------+    \---------------/
+     :                                   ^
+     |          Lots of work             |
+     +-----------------------------------+
+....
+
+
+Test of `dot` type diagram.
+[graphviz, "dot-test", svg]
+....
+digraph G {  bgcolor="purple:pink" label="agraph" fontcolor="white"
+  subgraph cluster1 {fillcolor="blue:cyan" label="acluster" fontcolor="white" style="filled" gradientangle="270"
+		node [shape=box fillcolor="red:yellow" style="filled" gradientangle=90]
+		anode;
+	}
+}
+....
+
+Test of `plantuml` diagram.
+[plantuml, diagram-classes, svg]
+....
+include::test.puml[]
+....
+
+=== Icons
+
+// font awesome: http://fortawesome.github.io/Font-Awesome//icons/
+// what version is packaged? (downloaded?)
+// add color: via "role" (css class in html?)
+// NOTE: with pdf output only size is working, attributes role, rotate and flip are ignored
+
+icon:heart[2x] icon:umbrella[flip=vertical]
+
+icon:android[role="blue"] icon:shield[rotate=90, size=2x, role="red"]
+
+=== Hyphenation
+
+// more important in case of alignment=justify
+// ­ this is a soft hyphenation character, looks like a dash in editor.
+// test OK for html and pdf
+
+testing unicode soft hyphenation shy U+00AD.
+
+this is a longlonglonglonglonglonglonglonglonglongshy­longlonglonglonglonglongshy­longlonglongword
+
+this is a longlonglonglonglongshy­longlonglonglonglonglongshy­longlonglonglonglonglongshy­longlonglonglonglonglonglongloshy­nglonglonglonglonglongshylonglonglonglonglonglonglonglongwordlonglonglonglonglonglonglonshy­glonglonglonglongshylongshy­longlonglonglonglonglonglongword
+
+
+[[ref01]]
+=== Referencing
+
+==== Footnote
+
+// foot notes are "broken" (i.e. rendered inline) with asciidoctor-pdf
+// see rather old bug https://github.com/asciidoctor/asciidoctor-pdf/issues/85
+
+This is not interesting at all footnote:[This is not interesting].
+This is again not interesting at all footnote:[This is again not interesting].
+
+This is defined with ref.footnoteref:[ref01,This is again not interesting referenced]
+
+This is referenced with ref.footnoteref:[ref01].
+
+
+==== Bibliography
+
+_The Pragmatic Programmer_ <<prag>> should be required reading for all developers.
+
+[bibliography]
+- [[[prag]]] Andy Hunt & Dave Thomas. The Pragmatic Programmer:
+  From Journeyman to Master. Addison-Wesley. 1999.
+- [[[Book]]] Book to read. Read it. 2011.
+
+==== Formatting
+
+Normal +
+_Italic_ +
+*Bold* +
+// _*Bold Italic*_ this is not working
+*_Bold Italic_*
+
+`Monospaced Text iii WWW 1234567890` +
+`_Monospaced Italic_` +
+`*Monospaced Bold*` +
+`*_Monospaced Bold Italic_*` 
+
+Some text makros: 
+A -> B, (C), etc..
+
+List
+
+* Item 1
+* Item 2
+** Item 2 1
+** Item 2 2
+
+[[ref12]]
+==== [[ref13]]Syntax Highlighting
+
+
+[source,java]
+----
+public class Hello {
+  public static void main(String[] args) {
+    System.out.println("hello");
+  }
+}
+----
+// BUG: when rendered at bottom of page the "grey side bar" filled the complete next page.
+// BUG: in pdf the "lead in text" (first line with ".") is omitted
+<<<
+==== Quote
+
+.After landing the cloaked Klingon bird of prey in Golden Gate park:
+[quote, Captain James T. Kirk, Star Trek IV: The Voyage Home]
+Everybody remember where we parked.
+
+[quote]
+A simple quote
+
+==== URLs and References
+
+// automatic detection
+http://asciidoctor.org/docs/user-manual/#url
+
+// named url
+http://asciidoctor.org/docs/user-manual/#xref[named url]
+
+// automatic
+see chapter <<Referencing>>
+
+// with manual reference, same result
+see chapter <<ref01>>
+
+// links title
+see chapter <<ref12>>
+
+// links TOC with name ref13?
+see chapter <<ref13>>

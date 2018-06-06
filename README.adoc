@@ -1,0 +1,36 @@
+== asciidoc sample
+
+example maven project that shows usage of asciidoctor maven plugin to generate html or pdf.
+
+.links
+asciidoctor maven plugin: https://github.com/asciidoctor/asciidoctor-maven-plugin +
+asciidoctor (full) manual: http://asciidoctor.org/docs/user-manual/ (chapter 16: document anatomy)
+
+=== setup
+
+maven + java + graphviz dot
+
+linux: 
+``` 
+apt-get install graphviz
+```
+
+for windows:
+stripped "minidot" with 700kB is in repository (see `bin/win32/minidot/`)
+
+
+=== usage hints
+
+edit sources in `src/main/asciidoc`
+
+generate html:
+``` 
+mvn clean process-resources
+```
+
+or generate pdf:
+```
+mvn clean process-resources -Ppdf
+```
+
+find results in `target/generated-docs`

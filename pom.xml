@@ -1,0 +1,174 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>somejavacode</groupId>
+    <artifactId>asciidoc-sample</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <!-- not used by asciidoctor -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- asciidoctor backends:
+             * docbook: plugin default
+             * html: use by default
+             * pdf: activate with profile "pdf". requires extra "asciidoctorj-pdf" dependency.
+        -->
+        <asciidoctor.backend>html</asciidoctor.backend>
+        <!-- this is the default value -->
+        <asciidoctor.imagesDir>images</asciidoctor.imagesDir>
+
+        <!-- default: excpect graphviz "dot" in path, override in profile -->
+        <graphviz.dot.binary>dot</graphviz.dot.binary>
+    </properties>
+
+    <build>
+        <defaultGoal>process-resources</defaultGoal>
+
+        <plugins>
+            <plugin>
+                <!-- https://github.com/asciidoctor/asciidoctor-maven-plugin -->
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>1.5.5</version>
+
+                <executions>
+                    <execution>
+                        <id>output-docs</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <!-- could add execution specific configuration -->
+                        </configuration>
+                    </execution>
+
+                </executions>
+
+                <configuration>
+                    <backend>${asciidoctor.backend}</backend>
+
+                    <!-- set "single" document, avoid double conversion if includes are used
+                         but this support only singe starting point -->
+                    <!--<sourceDocumentName>test.adoc</sourceDocumentName>-->
+                    
+                    <!-- using trick: *.adoc as root files, *.asciidoc as includes -->
+                    <sourceDocumentExtensions>adoc</sourceDocumentExtensions>
+
+                    <preserveDirectories>true</preserveDirectories>
+
+                    <!-- current asciidoc path is used for "references" ("include" only) -->
+                    <relativeBaseDir>true</relativeBaseDir>
+
+                    <sourceHighlighter>coderay</sourceHighlighter>
+
+                    <!-- article is default -->
+                    <!--<doctype>article</doctype>-->
+                    <!--<doctype>book</doctype>-->
+
+                    <!-- enable diagrams, needs also dependency below -->
+                    <requires>
+                        <!-- <require>asciidoctor-diagram/ditaa</require> enable ditaa only -->
+                        <require>asciidoctor-diagram</require>
+                    </requires>
+
+                    <attributes>
+                        <dot>${graphviz.dot.binary}</dot>
+
+                        <!-- TODO: what if this is packaged in a maven artifact? unpack with resource plugin? -->
+                        <pdf-stylesdir>${project.basedir}/src/main/asciidoc-pdf/themes</pdf-stylesdir>
+
+                         <!--loads ${pdf-stylesdir}/custom-theme.yml-->
+                        <pdf-style>custom</pdf-style>
+
+                        <pdf-fontsdir>${project.basedir}/src/main/asciidoc-pdf/fonts</pdf-fontsdir>
+
+                        <icons>font</icons> <!-- NOTE: this can be in document header OR pom.xml -->
+
+                        <!--<stylesheet>my-theme.css</stylesheet>-->
+                    </attributes>
+                    <!-- override image directory to enable generated images in PDF
+                      NOTE: it is unclear what "imagesDir" actually does. source? destination?
+                      resource plugin "will copy "static" images from src/main/asciidoc/images to same location -->
+
+                    <!-- setting this "fully qualified" messes up html with ugly fully qualified file links.
+                         good: <img src="images/test1.svg"
+                         bad: <img src="F:/dev/github/asciidoc-sample/target/generated-docs/images/ditaa-test.png"
+                         -->
+                    <imagesDir>${asciidoctor.imagesDir}</imagesDir>
+
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jruby</groupId>
+                        <artifactId>jruby-complete</artifactId>
+                        <version>9.1.8.0</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctorj-diagram</artifactId>
+                        <version>1.5.4</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctorj-pdf</artifactId>
+                        <version>1.5.0-alpha.14</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <!-- here the phase you need -->
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated-docs/images</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <!-- todo: conflicts with other things? -->
+                                    <directory>src/main/asciidoc/images</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <!-- switch backend to pdf -->
+            <id>pdf</id>
+                <properties>
+                    <asciidoctor.backend>pdf</asciidoctor.backend>
+                    <asciidoctor.imagesDir>${project.build.directory}/generated-docs/images</asciidoctor.imagesDir>
+                </properties>
+        </profile>
+        <profile>
+            <id>windows-mini-dot</id>
+            <!-- automatic activate "minidot" for windows platform -->
+            <activation>
+                <os><family>windows</family></os>
+            </activation>
+            <properties>
+                <graphviz.dot.binary>${project.basedir}/bin/win32/minidot/dot.exe</graphviz.dot.binary>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>
